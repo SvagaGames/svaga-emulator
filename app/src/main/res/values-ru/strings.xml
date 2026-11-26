@@ -50,7 +50,7 @@
     <string name="off">выкл</string>
     <string name="exit_game">В библиотеку</string>
     <string name="legal">Svaga Emulator не содержит игр. Используйте только ROM, которыми владеете. Ядра эмуляции: libretro (GPLv2/v3 и др.), оболочка: LibretroDroid (GPLv3).</string>
-    <string name="version">Svaga Games, v0.4.0</string>
+    <string name="version">Svaga Games, v0.5.0</string>
     <string name="players">Игроки</string>
     <string name="community">СООБЩЕСТВО</string>
     <string name="community_total">сыграно %1$s · игроков: %2$d</string>
@@ -60,4 +60,27 @@
     <string name="bios_added_n">Файлов BIOS добавлено: %1$d</string>
     <string name="change_system">Система: %1$s (сменить)</string>
     <string name="core_not_in_build">нет в этой сборке</string>
+    <string name="tab_games">Игры</string>
+    <string name="tab_systems">Системы</string>
+    <string name="tab_profile">Профиль</string>
+    <string name="import_roms_short">+ Добавить</string>
+    <string name="all_systems">Все</string>
+    <string name="search_library">Поиск по вашим играм</string>
+    <string name="empty_title">Полка пока пуста</string>
+    <string name="empty_bios_hint">Для PlayStation, Sega CD, Saturn, Dreamcast и некоторых других нужны ещё файлы BIOS: Системы → BIOS.</string>
+    <string name="continue_title">Продолжить</string>
+    <string name="played_total">Сыграно: %1$s</string>
+    <string name="choose_system">Какая это система?</string>
+    <string name="relink">Привязать к другой игре Svaga</string>
+    <string name="systems_subtitle">Систем в этой сборке: %1$d</string>
+    <string name="bios_title">Файлы BIOS</string>
+    <string name="bios_hint">Некоторым системам нужен BIOS приставки: PlayStation (scph5501.bin), Sega CD (bios_CD_U.bin), Saturn (saturn_bios.bin), Dreamcast (dc_boot.bin, dc_flash.bin), Lynx (lynxboot.img). Используйте только файлы со своих приставок.</string>
+    <string name="import_bios_long">Добавить файлы BIOS</string>
+    <string name="ext_choose">выбирается вручную при добавлении</string>
+    <string name="players_subtitle">Все, кто пользуется Svaga Archive и Svaga Emulator</string>
+    <string name="stat_games">игр</string>
+    <string name="stat_hours">часов</string>
+    <string name="stat_systems">систем</string>
+    <string name="account_benefits">Со Svaga ID время в играх попадает в профиль Svaga Archive, видны другие игроки, можно ставить оценки.</string>
+    <string name="get_archive">Скачать Svaga Archive</string>
 </resources>

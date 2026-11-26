@@ -50,7 +50,7 @@
     <string name="off">off</string>
     <string name="exit_game">Exit to library</string>
     <string name="legal">Svaga Emulator contains no games. Use only ROMs you own. Emulation cores: libretro (GPLv2/v3 and others), frontend: LibretroDroid (GPLv3).</string>
-    <string name="version">Svaga Games, v0.4.0</string>
+    <string name="version">Svaga Games, v0.5.0</string>
     <string name="players">Players</string>
     <string name="community">COMMUNITY</string>
     <string name="community_total">%1$s played · players: %2$d</string>
@@ -60,4 +60,27 @@
     <string name="bios_added_n">BIOS files added: %1$d</string>
     <string name="change_system">System: %1$s (change)</string>
     <string name="core_not_in_build">not in this build</string>
+    <string name="tab_games">Games</string>
+    <string name="tab_systems">Systems</string>
+    <string name="tab_profile">Profile</string>
+    <string name="import_roms_short">+ Add</string>
+    <string name="all_systems">All</string>
+    <string name="search_library">Search your games</string>
+    <string name="empty_title">Your shelf is empty</string>
+    <string name="empty_bios_hint">PlayStation, Sega CD, Saturn, Dreamcast and some others also need BIOS files: Systems → BIOS.</string>
+    <string name="continue_title">Continue</string>
+    <string name="played_total">Played: %1$s</string>
+    <string name="choose_system">Which system is it?</string>
+    <string name="relink">Link to another Svaga game</string>
+    <string name="systems_subtitle">%1$d systems in this build</string>
+    <string name="bios_title">BIOS files</string>
+    <string name="bios_hint">Some systems need the console BIOS: PlayStation (scph5501.bin), Sega CD (bios_CD_U.bin), Saturn (saturn_bios.bin), Dreamcast (dc_boot.bin, dc_flash.bin), Lynx (lynxboot.img). Use only files from consoles you own.</string>
+    <string name="import_bios_long">Add BIOS files</string>
+    <string name="ext_choose">choose by hand when adding</string>
+    <string name="players_subtitle">Everyone in Svaga Archive and Svaga Emulator</string>
+    <string name="stat_games">games</string>
+    <string name="stat_hours">hours</string>
+    <string name="stat_systems">systems</string>
+    <string name="account_benefits">With Svaga ID your play time goes to your Svaga Archive profile, you see other players and rate games.</string>
+    <string name="get_archive">Get Svaga Archive</string>
 </resources>

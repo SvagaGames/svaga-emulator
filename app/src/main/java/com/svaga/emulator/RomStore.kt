@@ -18,6 +18,11 @@ data class Rom(
     val gameName: String? = null,
     val lastPlayed: Long = 0,
     val playSeconds: Long = 0,
+    /** File name as imported, without the extension ("Super Game (USA)"): used to find box art. */
+    val original: String? = null,
+    /** Cover from the Svaga catalog (set when the ROM is linked to a Svaga game). */
+    val cover: String? = null,
+    val addedAt: Long = 0,
 )
 
 class ImportResult(val added: List<Rom>, val skipped: Int)
@@ -42,6 +47,8 @@ class RomStore(private val context: Context) {
                     gameId = if (o.has("gameId")) o.getInt("gameId") else null,
                     gameName = o.optString("gameName").ifEmpty { null },
                     lastPlayed = o.optLong("lastPlayed"), playSeconds = o.optLong("playSeconds"),
+                    original = o.optString("orig").ifEmpty { null }, cover = o.optString("cover").ifEmpty { null },
+                    addedAt = o.optLong("addedAt"),
                 )
             }
         }.getOrDefault(emptyList())
@@ -52,9 +59,11 @@ class RomStore(private val context: Context) {
         val arr = JSONArray()
         list.forEach { r ->
             arr.put(JSONObject().put("id", r.id).put("title", r.title).put("system", r.system.name).put("file", r.file)
-                .put("lastPlayed", r.lastPlayed).put("playSeconds", r.playSeconds).apply {
+                .put("lastPlayed", r.lastPlayed).put("playSeconds", r.playSeconds).put("addedAt", r.addedAt).apply {
                     r.gameId?.let { put("gameId", it) }
                     r.gameName?.let { put("gameName", it) }
+                    r.original?.let { put("orig", it) }
+                    r.cover?.let { put("cover", it) }
                 })
         }
         val tmp = File(index.path + ".tmp")
@@ -107,7 +116,7 @@ class RomStore(private val context: Context) {
         val id = UUID.randomUUID().toString().replace("-", "").take(12)
         val out = File(romsDir, "$id.$ext")
         context.contentResolver.openInputStream(uri)?.use { i -> out.outputStream().use { o -> i.copyTo(o) } } ?: return null
-        return Rom(id, cleanTitle(name), sys, out.name)
+        return Rom(id, cleanTitle(name), sys, out.name, original = name.substringBeforeLast('.'), addedAt = System.currentTimeMillis())
     }
 
     /** A zip with one ROM inside: the first entry with a known extension is extracted. */
@@ -119,7 +128,7 @@ class RomStore(private val context: Context) {
             val id = UUID.randomUUID().toString().replace("-", "").take(12)
             val out = File(romsDir, "$id.zip")
             context.contentResolver.openInputStream(uri)?.use { i -> out.outputStream().use { o -> i.copyTo(o) } } ?: return null
-            return Rom(id, cleanTitle(zipName), Console.ARCADE, out.name)
+            return Rom(id, cleanTitle(zipName), Console.ARCADE, out.name, original = zipName.substringBeforeLast('.'), addedAt = System.currentTimeMillis())
         }
         context.contentResolver.openInputStream(uri)?.use { raw ->
             ZipInputStream(raw).use { zin ->
@@ -131,7 +140,8 @@ class RomStore(private val context: Context) {
                     val id = UUID.randomUUID().toString().replace("-", "").take(12)
                     val out = File(romsDir, "$id.$ext")
                     out.outputStream().use { zin.copyTo(it) }
-                    return Rom(id, cleanTitle(e.name.substringAfterLast('/').ifEmpty { zipName }), sys, out.name)
+                    val inner = e.name.substringAfterLast('/').ifEmpty { zipName }
+                    return Rom(id, cleanTitle(inner), sys, out.name, original = inner.substringBeforeLast('.'), addedAt = System.currentTimeMillis())
                 }
             }
         }

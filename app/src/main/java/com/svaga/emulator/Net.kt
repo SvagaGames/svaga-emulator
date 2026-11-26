@@ -15,7 +15,7 @@ class ApiError(val code: String) : Exception(code)
 data class Player(val id: String, val name: String, val seconds: Long, val rating: Int?)
 data class Community(val totalSeconds: Long, val players: Int, val avgRating: Double?, val ratingCount: Int, val top: List<Player>)
 data class Person(val id: String, val name: String, val level: Int, val library: Int, val completed: Int)
-data class FoundGame(val id: Int, val name: String, val year: Int?, val platforms: String)
+data class FoundGame(val id: Int, val name: String, val year: Int?, val platforms: String, val cover: String? = null)
 
 /** Svaga ID session (same account as Svaga Archive). The e-mail/password login is used; tokens stay in app-private prefs. */
 class Session(context: Context) {
@@ -77,8 +77,14 @@ class Net(private val session: Session) {
                 g.getInt("id"), g.optString("name"),
                 g.optString("releaseDate", "").take(4).toIntOrNull(),
                 (0 until (plats?.length() ?: 0)).joinToString(", ") { i -> plats!!.getString(i) },
+                g.optString("cover").ifEmpty { null }?.takeIf { it != "null" },
             )
         }
+    }
+
+    /** Cover of a Svaga catalog game (for ROMs linked from Svaga Archive). */
+    suspend fun gameCover(gameId: Int): String? = withContext(Dispatchers.IO) {
+        authed("GET", "/v1/catalog/games/$gameId").optString("cover").ifEmpty { null }?.takeIf { it != "null" }
     }
 
     suspend fun community(gameId: Int): Community = withContext(Dispatchers.IO) {
