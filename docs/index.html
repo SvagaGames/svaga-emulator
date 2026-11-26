@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Svaga Emulator — скачать</title>
+<style>
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#13324a 0,#0A0C11 60%);color:#F3F5F9;font:16px system-ui,sans-serif;text-align:center}
+  .card{padding:32px 24px;max-width:360px}
+  img{width:128px;height:128px;border-radius:30px;box-shadow:0 10px 40px #0008}
+  h1{margin:20px 0 6px;font-size:28px}
+  p{color:#9AA3B5;margin:0 0 24px}
+  a.btn{display:block;padding:16px;border-radius:16px;background:linear-gradient(90deg,#3EE0FF,#4F7CFF);color:#071018;font-weight:700;text-decoration:none;font-size:18px}
+  small{display:block;margin-top:16px;color:#5B6375}
+  #ver{color:#3EE0FF}
+</style>
+</head>
+<body>
+<div class="card">
+  <img src="icon.png" alt="Svaga Emulator">
+  <h1>Svaga Emulator</h1>
+  <p>Эмулятор ретро-приставок Svaga Games <span id="ver"></span></p>
+  <a class="btn" href="https://github.com/SvagaGames/svaga-emulator/releases/latest/download/SvagaEmulator.apk">Скачать APK</a>
+  <small>Android 8.0 и новее, 64-битный процессор. Игр в комплекте нет — добавляйте свои ROM.</small>
+</div>
+<script>
+  fetch("https://api.github.com/repos/SvagaGames/svaga-emulator/releases/latest")
+    .then(r => r.json()).then(j => { if (j.tag_name) document.getElementById("ver").textContent = "· " + j.tag_name; }).catch(() => {});
+</script>
+</body>
+</html>

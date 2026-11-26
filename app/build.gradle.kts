@@ -52,7 +52,8 @@ android {
         }
         release {
             isMinifyEnabled = false
-            if (hasKey) signingConfig = signingConfigs.getByName("svaga")
+            // without the permanent key (secrets not set yet) the APK is still installable, signed with the debug key
+            signingConfig = signingConfigs.getByName(if (hasKey) "svaga" else "debug")
         }
     }
     compileOptions {
