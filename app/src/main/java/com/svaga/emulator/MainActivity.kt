@@ -60,6 +60,9 @@ class MainActivity : ComponentActivity() {
     private var pendingGameName by mutableStateOf<String?>(null)
     private var roms by mutableStateOf<List<Rom>>(emptyList())
     private var signedIn by mutableStateOf(false)
+    private var svagaList by mutableStateOf<List<SvagaRelease>>(emptyList())
+    private var pendingRelease by mutableStateOf<SvagaRelease?>(null)
+    private var downloads by mutableStateOf<Map<Int, Float>>(emptyMap())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,6 +107,36 @@ class MainActivity : ComponentActivity() {
             return
         }
         startActivity(Intent(this, PlayerActivity::class.java).putExtra("romId", rom.id))
+    }
+
+    /** Downloads the file the Creator attached to a Svaga game, imports it and links it to that game. */
+    private fun downloadRelease(r: SvagaRelease) {
+        val url = r.url ?: return
+        if (downloads.containsKey(r.gameId)) return
+        downloads = downloads + (r.gameId to 0f)
+        CoroutineScope(Dispatchers.Main).launch {
+            val dir = java.io.File(cacheDir, "downloads").apply { mkdirs() }
+            val name = (r.fileName ?: url.substringAfterLast('/').substringBefore('?')).replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "game.bin" }
+            val file = java.io.File(dir, name)
+            try {
+                net.download(url, file) { p -> runOnUiThread { downloads = downloads + (r.gameId to p) } }
+                val res = withContext(Dispatchers.IO) { store.import(listOf(android.net.Uri.fromFile(file))) }
+                val rom = res.added.firstOrNull()
+                if (rom == null) {
+                    Toast.makeText(this@MainActivity, getString(R.string.download_unknown_format, name), Toast.LENGTH_LONG).show()
+                } else {
+                    store.update(rom.id) { it.copy(gameId = r.gameId, gameName = r.name, cover = r.cover, title = r.name) }
+                    if (pendingGameId == r.gameId) { pendingGameId = null; pendingGameName = null; pendingRelease = null }
+                    Toast.makeText(this@MainActivity, getString(R.string.download_done, r.name), Toast.LENGTH_LONG).show()
+                }
+                roms = store.all()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, R.string.download_failed, Toast.LENGTH_LONG).show()
+            } finally {
+                file.delete()
+                downloads = downloads - r.gameId
+            }
+        }
     }
 
     private fun fmtDur(seconds: Long): String {
@@ -179,6 +212,13 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
             }
         }
+        LaunchedEffect(signedIn) {
+            if (signedIn) svagaList = runCatching { net.svagaGames() }.getOrDefault(svagaList)
+        }
+        LaunchedEffect(pendingGameId, signedIn) {
+            val gid = pendingGameId
+            pendingRelease = if (gid != null && signedIn) runCatching { net.svagaGame(gid) }.getOrNull() else null
+        }
         // linked ROMs get their cover from the Svaga catalog once
         LaunchedEffect(roms, signedIn) {
             if (!signedIn) return@LaunchedEffect
@@ -215,13 +255,26 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         pendingGameName?.let { name ->
+                            val rel = pendingRelease
                             SvCard(Modifier.fillMaxWidth().padding(bottom = 12.dp), border = Amber.copy(alpha = 0.6f)) {
-                                Body(stringResource(R.string.launch_missing, name), color = Amber, size = 14)
+                                Body(stringResource(if (rel?.url != null) R.string.launch_can_download else R.string.launch_missing, name), color = Amber, size = 14)
+                                downloads[pendingGameId]?.let { p -> Spacer(Modifier.height(8.dp)); ProgressLine(p, Cyan) }
                                 Spacer(Modifier.height(10.dp))
                                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    SvButton(stringResource(R.string.import_roms), { picker.launch(arrayOf("*/*")) }, Modifier.weight(1f))
-                                    SvButton(stringResource(R.string.cancel), { pendingGameId = null; pendingGameName = null }, kind = BtnKind.Secondary)
+                                    if (rel?.url != null) {
+                                        SvButton(stringResource(R.string.download_game), { downloadRelease(rel) }, Modifier.weight(1f), busy = downloads.containsKey(rel.gameId))
+                                    } else {
+                                        SvButton(stringResource(R.string.import_roms), { picker.launch(arrayOf("*/*")) }, Modifier.weight(1f))
+                                    }
+                                    SvButton(stringResource(R.string.cancel), { pendingGameId = null; pendingGameName = null; pendingRelease = null }, kind = BtnKind.Secondary)
                                 }
+                            }
+                        }
+                        val ready = svagaList.filter { it.url != null }
+                        if (ready.isNotEmpty() && query.isBlank() && filter == null) {
+                            Text(stringResource(R.string.svaga_shelf), color = Ink, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                            Row(Modifier.horizontalScroll(rememberScrollState()).padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                ready.forEach { r -> ReleaseCard(r) }
                             }
                         }
                         if (last != null && filter == null && query.isBlank()) {
@@ -264,6 +317,26 @@ class MainActivity : ComponentActivity() {
                 onPlay = { selected = null; play(rom) },
                 onDelete = { store.delete(rom); roms = store.all(); selected = null },
             )
+        }
+    }
+
+    @Composable
+    private fun ReleaseCard(r: SvagaRelease) {
+        val have = roms.firstOrNull { it.gameId == r.gameId }
+        val p = downloads[r.gameId]
+        Column(Modifier.width(118.dp)) {
+            Box(Modifier.fillMaxWidth().aspectRatio(0.75f).clip(CoverShape).background(Brush.linearGradient(listOf(Cyan.copy(alpha = 0.4f), Blue.copy(alpha = 0.4f))))) {
+                if (r.cover != null) AsyncImage(r.cover, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                Pill("SVAGA", Green, Modifier.align(Alignment.TopStart).padding(6.dp), filled = true)
+            }
+            Spacer(Modifier.height(6.dp))
+            Body(r.name, size = 13, maxLines = 2, bold = true)
+            Spacer(Modifier.height(6.dp))
+            when {
+                p != null -> ProgressLine(p, Cyan)
+                have != null -> PixelButton("▶ " + stringResource(R.string.play), { play(have) }, Modifier.fillMaxWidth())
+                else -> PixelButton(stringResource(R.string.download_short), { downloadRelease(r) }, Modifier.fillMaxWidth())
+            }
         }
     }
 
@@ -609,6 +682,16 @@ class MainActivity : ComponentActivity() {
         val failed = stringResource(R.string.login_failed)
         val noNet = stringResource(R.string.no_connection)
         val total = roms.sumOf { it.playSeconds }
+        val archiveAuth = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
+            val d = res.data
+            val access = d?.getStringExtra("accessToken")
+            val refresh = d?.getStringExtra("refreshToken")
+            if (res.resultCode == RESULT_OK && !access.isNullOrBlank() && !refresh.isNullOrBlank()) {
+                net.saveHandoff(access, refresh, d!!.getStringExtra("email"))
+                signedIn = true
+                Toast.makeText(ctx, getString(R.string.signed_as, d.getStringExtra("displayName")?.ifBlank { null } ?: d.getStringExtra("email") ?: ""), Toast.LENGTH_LONG).show()
+            }
+        }
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = 12.dp, bottom = 120.dp)) {
             H1(stringResource(R.string.tab_profile))
             Spacer(Modifier.height(14.dp))
@@ -630,6 +713,16 @@ class MainActivity : ComponentActivity() {
                 } else {
                     Caption(stringResource(R.string.account_benefits), maxLines = 4)
                     Spacer(Modifier.height(12.dp))
+                    SvButton(stringResource(R.string.signin_with_archive), {
+                        val i = Intent("com.svaga.archive.AUTHORIZE_EMULATOR").setPackage("com.svaga.archive")
+                        try { archiveAuth.launch(i) } catch (e: Exception) {
+                            Toast.makeText(ctx, R.string.archive_missing, Toast.LENGTH_LONG).show()
+                            runCatching { startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://svagagames.github.io/svaga-archive/"))) }
+                        }
+                    }, Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(14.dp))
+                    Caption(stringResource(R.string.or_password), color = Faint)
+                    Spacer(Modifier.height(8.dp))
                     SvField(email, { email = it }, stringResource(R.string.email))
                     Spacer(Modifier.height(10.dp))
                     SvField(pass, { pass = it }, stringResource(R.string.password), password = true)

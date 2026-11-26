@@ -15,6 +15,8 @@ class ApiError(val code: String) : Exception(code)
 data class Player(val id: String, val name: String, val seconds: Long, val rating: Int?)
 data class Community(val totalSeconds: Long, val players: Int, val avgRating: Double?, val ratingCount: Int, val top: List<Player>)
 data class Person(val id: String, val name: String, val level: Int, val library: Int, val completed: Int)
+data class SvagaRelease(val gameId: Int, val name: String, val cover: String?, val year: String?, val platforms: String, val url: String?, val fileName: String?)
+
 data class FoundGame(val id: Int, val name: String, val year: Int?, val platforms: String, val cover: String? = null)
 
 /** Svaga ID session (same account as Svaga Archive). The e-mail/password login is used; tokens stay in app-private prefs. */
@@ -44,6 +46,68 @@ class Net(private val session: Session) {
         val text = (if (code in 200..299) c.inputStream else c.errorStream)?.bufferedReader()?.use { it.readText() } ?: ""
         if (code !in 200..299) throw ApiError(runCatching { JSONObject(text).optString("error", "http_$code") }.getOrDefault("http_$code"))
         return if (text.isBlank()) JSONObject() else JSONObject(text)
+    }
+
+    /** Tokens handed over by Svaga Archive ("Sign in with Svaga Archive"). */
+    fun saveHandoff(access: String, refresh: String, email: String?) {
+        session.access = access
+        session.refresh = refresh
+        session.email = email ?: session.email
+    }
+
+    private fun parseRelease(g: JSONObject, fallbackId: Int = 0): SvagaRelease {
+        val d = g.optJSONObject("download")
+        val plats = g.optJSONArray("platforms")
+        return SvagaRelease(
+            g.optInt("gameId", fallbackId), g.optString("name"), g.optString("cover").ifEmpty { null }?.takeIf { it != "null" },
+            g.optString("year").ifEmpty { null }?.takeIf { it != "null" },
+            (0 until (plats?.length() ?: 0)).joinToString(", ") { i -> plats!!.getString(i) },
+            d?.optString("url")?.ifEmpty { null }, d?.optString("name")?.ifEmpty { null }?.takeIf { it != "null" },
+        )
+    }
+
+    /** Games the Creator prepared for the emulator (some with a downloadable file). */
+    suspend fun svagaGames(): List<SvagaRelease> = withContext(Dispatchers.IO) {
+        val arr = authed("GET", "/v1/emulator/games").optJSONArray("items") ?: return@withContext emptyList()
+        (0 until arr.length()).map { parseRelease(arr.getJSONObject(it)) }
+    }
+
+    suspend fun svagaGame(gameId: Int): SvagaRelease? = withContext(Dispatchers.IO) {
+        val o = authed("GET", "/v1/games/$gameId/emulator")
+        if (!o.optBoolean("enabled") && o.optJSONObject("download") == null) null else parseRelease(o, gameId)
+    }
+
+    /** Downloads a file (https) into [dest]; reports 0..1. */
+    suspend fun download(url: String, dest: java.io.File, progress: (Float) -> Unit) = withContext(Dispatchers.IO) {
+        var c = URL(url).openConnection() as HttpURLConnection
+        c.connectTimeout = 15000
+        c.readTimeout = 60000
+        c.instanceFollowRedirects = true
+        var code = c.responseCode
+        var hops = 0
+        while (code in 300..399 && hops < 5) { // https -> https redirects (GitHub releases, Drive ...)
+            val next = c.getHeaderField("Location") ?: break
+            c.disconnect()
+            c = URL(URL(url), next).openConnection() as HttpURLConnection
+            c.connectTimeout = 15000; c.readTimeout = 60000
+            code = c.responseCode; hops++
+        }
+        if (code !in 200..299) throw ApiError("download_$code")
+        val total = c.contentLengthLong
+        dest.parentFile?.mkdirs()
+        c.inputStream.use { input ->
+            dest.outputStream().use { out ->
+                val buf = ByteArray(64 * 1024)
+                var done = 0L
+                while (true) {
+                    val n = input.read(buf)
+                    if (n < 0) break
+                    out.write(buf, 0, n)
+                    done += n
+                    if (total > 0) progress((done.toFloat() / total).coerceIn(0f, 1f))
+                }
+            }
+        }
     }
 
     private fun save(o: JSONObject) {

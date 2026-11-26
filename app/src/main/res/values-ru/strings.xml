@@ -50,7 +50,7 @@
     <string name="off">выкл</string>
     <string name="exit_game">В библиотеку</string>
     <string name="legal">Svaga Emulator не содержит игр. Используйте только ROM, которыми владеете. Ядра эмуляции: libretro (GPLv2/v3 и др.), оболочка: LibretroDroid (GPLv3).</string>
-    <string name="version">Svaga Games, v0.5.0</string>
+    <string name="version">Svaga Games, v0.6.0</string>
     <string name="players">Игроки</string>
     <string name="community">СООБЩЕСТВО</string>
     <string name="community_total">сыграно %1$s · игроков: %2$d</string>
@@ -83,4 +83,14 @@
     <string name="stat_systems">систем</string>
     <string name="account_benefits">Со Svaga ID время в играх попадает в профиль Svaga Archive, видны другие игроки, можно ставить оценки.</string>
     <string name="get_archive">Скачать Svaga Archive</string>
+    <string name="download_unknown_format">%1$s: неизвестный тип файла</string>
+    <string name="download_done">%1$s теперь на полке</string>
+    <string name="download_failed">Не удалось скачать игру</string>
+    <string name="launch_can_download">Игры «%1$s» пока нет на полке, но её можно скачать из Svaga.</string>
+    <string name="download_game">Скачать игру</string>
+    <string name="svaga_shelf">Доступно в Svaga</string>
+    <string name="download_short">Скачать</string>
+    <string name="signin_with_archive">Войти через Svaga Archive</string>
+    <string name="archive_missing">Установите Svaga Archive и войдите в нём</string>
+    <string name="or_password">или по e-mail и паролю</string>
 </resources>
