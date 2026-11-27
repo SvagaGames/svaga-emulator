@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Svaga Emulator: a gamepad with fox ears (the Svaga fox), warm gradient; Svaga Archive uses the cold one. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#3EE0FF"
-        android:pathData="M42,26h8v8h-8z M50,26h8v8h-8z M58,26h8v8h-8z M34,34h8v8h-8z M66,34h8v8h-8z M34,42h8v8h-8z M42,50h8v8h-8z M50,50h8v8h-8z M58,50h8v8h-8z M66,58h8v8h-8z M34,66h8v8h-8z M66,66h8v8h-8z M42,74h8v8h-8z M50,74h8v8h-8z M58,74h8v8h-8z" />
+    <!-- ears -->
+    <path android:pathData="M32,50 L36,30 L49,46 Z M76,50 L72,30 L59,46 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="30" android:startY="30" android:endX="78" android:endY="50"
+                android:startColor="#FFFFB547" android:endColor="#FFFF6A3D" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FF2A1430" android:pathData="M36.5,45 L38,36.5 L44.5,44.5 Z M71.5,45 L70,36.5 L63.5,44.5 Z" />
+    <!-- body -->
+    <path android:pathData="M37,45 H71 A13,13 0 0 1 84,58 V64 A12,12 0 0 1 72,76 L67,76 A6,6 0 0 1 61.5,72.5 L59.5,69 H48.5 L46.5,72.5 A6,6 0 0 1 41,76 H36 A12,12 0 0 1 24,64 V58 A13,13 0 0 1 37,45 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="24" android:startY="45" android:endX="84" android:endY="76"
+                android:startColor="#FFFFB547" android:centerColor="#FFFF6A3D" android:endColor="#FFFF3D7F" />
+        </aapt:attr>
+    </path>
+    <!-- shine -->
+    <path android:fillColor="#33FFFFFF" android:pathData="M37,47 H71 A11,11 0 0 1 81.5,55 H26.5 A11,11 0 0 1 37,47 Z" />
+    <!-- d-pad -->
+    <path android:fillColor="#FF0A0C11" android:pathData="M35,53 h4.5 v4.5 h4.5 v4.5 h-4.5 v4.5 h-4.5 v-4.5 h-4.5 v-4.5 h4.5 z" />
+    <!-- play mark -->
+    <path android:fillColor="#FF0A0C11" android:pathData="M51.5,55.5 L57.5,59 L51.5,62.5 Z" />
+    <!-- buttons -->
+    <path android:fillColor="#FF0A0C11" android:pathData="M69,56m-3.4,0a3.4,3.4 0,1 1,6.8 0a3.4,3.4 0,1 1,-6.8 0 M75.5,62m-3.4,0a3.4,3.4 0,1 1,6.8 0a3.4,3.4 0,1 1,-6.8 0" />
 </vector>

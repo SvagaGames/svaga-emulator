@@ -73,6 +73,7 @@ class MainActivity : ComponentActivity() {
         roms = store.all()
         signedIn = session.signedIn
         if (savedInstanceState == null) handleIntent(intent)
+        EmuUpdate.check(this, manual = false)
         setContent { SvagaTheme { Root() } }
     }
 
@@ -254,6 +255,7 @@ class MainActivity : ComponentActivity() {
                                     .clickable { picker.launch(arrayOf("*/*")) }.padding(horizontal = 14.dp, vertical = 8.dp),
                             )
                         }
+                        UpdateBanner()
                         pendingGameName?.let { name ->
                             val rel = pendingRelease
                             SvCard(Modifier.fillMaxWidth().padding(bottom = 12.dp), border = Amber.copy(alpha = 0.6f)) {
@@ -317,6 +319,33 @@ class MainActivity : ComponentActivity() {
                 onPlay = { selected = null; play(rom) },
                 onDelete = { store.delete(rom); roms = store.all(); selected = null },
             )
+        }
+    }
+
+    @Composable
+    private fun UpdateBanner() {
+        val v = EmuUpdate.version
+        if ((v == null && EmuUpdate.file == null) || EmuUpdate.dismissed) return
+        SvCard(Modifier.fillMaxWidth().padding(bottom = 12.dp), border = Cyan.copy(alpha = 0.6f)) {
+            val p = EmuUpdate.progress
+            Body(
+                when {
+                    EmuUpdate.file != null -> stringResource(R.string.update_ready)
+                    p != null -> stringResource(R.string.update_downloading, (p * 100).toInt())
+                    else -> stringResource(R.string.update_available_v, v ?: "")
+                },
+                bold = true,
+            )
+            if (p != null) { Spacer(Modifier.height(8.dp)); ProgressLine(p, Cyan) }
+            if (EmuUpdate.failed) Caption(stringResource(R.string.update_failed), color = Red)
+            if (p == null) {
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (EmuUpdate.file != null) SvButton(stringResource(R.string.update_install), { EmuUpdate.install(this@MainActivity) }, Modifier.weight(1f))
+                    else SvButton(stringResource(R.string.update_get), { EmuUpdate.start(this@MainActivity, net) }, Modifier.weight(1f))
+                    SvButton(stringResource(R.string.later), { EmuUpdate.dismissed = true }, kind = BtnKind.Secondary)
+                }
+            }
         }
     }
 
@@ -740,6 +769,26 @@ class MainActivity : ComponentActivity() {
                         runCatching { startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://svagagames.github.io/svaga-archive/"))) }
                     }, Modifier.fillMaxWidth(), kind = BtnKind.Ghost, accent = Cyan)
                 }
+            }
+            Spacer(Modifier.height(16.dp))
+            SvCard(Modifier.fillMaxWidth(), onClick = {
+                when {
+                    EmuUpdate.file != null -> EmuUpdate.install(this@MainActivity)
+                    EmuUpdate.version != null -> { EmuUpdate.dismissed = false; EmuUpdate.start(this@MainActivity, net) }
+                    else -> EmuUpdate.check(this@MainActivity, manual = true)
+                }
+            }) {
+                Body(stringResource(R.string.update_title) + " · v" + BuildConfig.VERSION_NAME, bold = true)
+                Caption(
+                    when {
+                        EmuUpdate.checking -> stringResource(R.string.update_checking)
+                        EmuUpdate.progress != null -> stringResource(R.string.update_downloading, ((EmuUpdate.progress ?: 0f) * 100).toInt())
+                        EmuUpdate.version != null -> stringResource(R.string.update_available_v, EmuUpdate.version ?: "")
+                        EmuUpdate.upToDate == true -> stringResource(R.string.update_latest)
+                        EmuUpdate.failed -> stringResource(R.string.update_failed)
+                        else -> stringResource(R.string.update_hint)
+                    },
+                )
             }
             Spacer(Modifier.height(16.dp))
             SvCard(Modifier.fillMaxWidth()) {

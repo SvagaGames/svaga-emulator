@@ -50,7 +50,7 @@
     <string name="off">выкл</string>
     <string name="exit_game">В библиотеку</string>
     <string name="legal">Svaga Emulator не содержит игр. Используйте только ROM, которыми владеете. Ядра эмуляции: libretro (GPLv2/v3 и др.), оболочка: LibretroDroid (GPLv3).</string>
-    <string name="version">Svaga Games, v0.6.0</string>
+    <string name="version">Svaga Games, v0.7.0</string>
     <string name="players">Игроки</string>
     <string name="community">СООБЩЕСТВО</string>
     <string name="community_total">сыграно %1$s · игроков: %2$d</string>
@@ -93,4 +93,15 @@
     <string name="signin_with_archive">Войти через Svaga Archive</string>
     <string name="archive_missing">Установите Svaga Archive и войдите в нём</string>
     <string name="or_password">или по e-mail и паролю</string>
+    <string name="update_title">Обновления</string>
+    <string name="update_ready">Обновление скачано — установите его</string>
+    <string name="update_downloading">Скачиваем обновление… %1$d%%</string>
+    <string name="update_available_v">Доступна версия %1$s</string>
+    <string name="update_failed">Не удалось обновить, попробуйте позже</string>
+    <string name="update_install">Установить</string>
+    <string name="update_get">Обновить</string>
+    <string name="later">Позже</string>
+    <string name="update_checking">Проверяем…</string>
+    <string name="update_latest">У вас последняя версия</string>
+    <string name="update_hint">Нажмите, чтобы проверить новую версию</string>
 </resources>
