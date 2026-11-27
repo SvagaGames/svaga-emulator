@@ -104,4 +104,6 @@
     <string name="update_checking">Проверяем…</string>
     <string name="update_latest">У вас последняя версия</string>
     <string name="update_hint">Нажмите, чтобы проверить новую версию</string>
+    <string name="autolinked_n">Привязано к Svaga Archive: %1$d. Наигранное время теперь засчитывается там.</string>
+    <string name="not_linked_hint">Не привязана к игре Svaga: время остаётся только здесь. Привяжи, чтобы часы шли в Svaga Archive.</string>
 </resources>

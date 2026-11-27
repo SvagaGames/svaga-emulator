@@ -220,6 +220,15 @@ class MainActivity : ComponentActivity() {
             val gid = pendingGameId
             pendingRelease = if (gid != null && signedIn) runCatching { net.svagaGame(gid) }.getOrNull() else null
         }
+        // new ROMs are linked to the Svaga catalog by title: their play time then goes to Svaga Archive
+        LaunchedEffect(roms.size, signedIn) {
+            if (!signedIn) return@LaunchedEffect
+            val n = withContext(Dispatchers.IO) { AutoLink.run(ctx, store, net) }
+            if (n > 0) {
+                roms = store.all()
+                Toast.makeText(ctx, ctx.getString(R.string.autolinked_n, n), Toast.LENGTH_LONG).show()
+            }
+        }
         // linked ROMs get their cover from the Svaga catalog once
         LaunchedEffect(roms, signedIn) {
             if (!signedIn) return@LaunchedEffect
@@ -472,6 +481,7 @@ class MainActivity : ComponentActivity() {
                         Spacer(Modifier.height(8.dp))
                         Caption(if (rom.playSeconds < 30) stringResource(R.string.never_played) else stringResource(R.string.played_total, fmtDur(rom.playSeconds)))
                         rom.gameName?.let { Caption(stringResource(R.string.linked_with, it), color = Green, maxLines = 1) }
+                        if (rom.gameName == null) Caption(stringResource(R.string.not_linked_hint), color = Amber, maxLines = 3)
                     }
                 }
                 Spacer(Modifier.height(16.dp))

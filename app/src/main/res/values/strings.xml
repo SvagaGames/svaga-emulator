@@ -104,4 +104,6 @@
     <string name="update_checking">Checking…</string>
     <string name="update_latest">You have the latest version</string>
     <string name="update_hint">Tap to check for a new version</string>
+    <string name="autolinked_n">Linked to Svaga Archive: %1$d. Your play time now counts there.</string>
+    <string name="not_linked_hint">Not linked to a Svaga game: play time stays only here. Link it to count hours in Svaga Archive.</string>
 </resources>
