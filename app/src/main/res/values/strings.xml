@@ -50,7 +50,7 @@
     <string name="off">off</string>
     <string name="exit_game">Exit to library</string>
     <string name="legal">Svaga Emulator contains no games. Use only ROMs you own. Emulation cores: libretro (GPLv2/v3 and others), frontend: LibretroDroid (GPLv3).</string>
-    <string name="version">Svaga Games, v0.7.0</string>
+    <string name="version">Svaga Games, v%1$s</string>
     <string name="players">Players</string>
     <string name="community">COMMUNITY</string>
     <string name="community_total">%1$s played · players: %2$d</string>

@@ -314,7 +314,7 @@ class MainActivity : ComponentActivity() {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Column(Modifier.padding(top = 12.dp)) {
                         Caption(stringResource(R.string.legal), color = Faint, maxLines = 6)
-                        Caption(stringResource(R.string.version), color = Faint)
+                        Caption(stringResource(R.string.version, BuildConfig.VERSION_NAME), color = Faint)
                     }
                 }
             }
@@ -806,7 +806,7 @@ class MainActivity : ComponentActivity() {
                 Spacer(Modifier.height(10.dp))
                 Caption(stringResource(R.string.legal), maxLines = 8)
                 Spacer(Modifier.height(6.dp))
-                Caption(stringResource(R.string.version), color = Faint)
+                Caption(stringResource(R.string.version, BuildConfig.VERSION_NAME), color = Faint)
             }
         }
     }

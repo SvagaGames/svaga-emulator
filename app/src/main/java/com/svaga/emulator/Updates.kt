@@ -41,13 +41,16 @@ object EmuUpdate {
         return false
     }
 
+    /** The hidden build number decides (all builds are named 1.0); the name is compared only for old releases without one. */
+    private fun newerBuild(v: String, code: Int?) = if (code != null) code > BuildConfig.VERSION_CODE else isNewer(v, BuildConfig.VERSION_NAME)
+
     fun check(ctx: Context, manual: Boolean) {
         val prefs = ctx.getSharedPreferences("svaga_updates", Context.MODE_PRIVATE)
         val now = System.currentTimeMillis()
         if (!manual && now - prefs.getLong("last_check", 0) < 6 * 3600 * 1000L) {
             val v = prefs.getString("version", null)
             val u = prefs.getString("url", null)
-            if (v != null && u != null && isNewer(v, BuildConfig.VERSION_NAME)) { version = v; url = u }
+            if (v != null && u != null && newerBuild(v, prefs.getInt("code", -1).takeIf { it > 0 })) { version = v; url = u }
             return
         }
         checking = true
@@ -69,9 +72,11 @@ object EmuUpdate {
                     val a = assets.getJSONObject(i)
                     if (a.optString("name") == "SvagaEmulator.apk") u = a.optString("browser_download_url")
                 }
-                prefs.edit().putLong("last_check", now).putString("version", v).putString("url", u).apply()
-                if (u != null && v.isNotBlank() && isNewer(v, BuildConfig.VERSION_NAME)) {
-                    version = v; url = u; notes = o.optString("body").ifBlank { null }; dismissed = false; upToDate = false
+                val body = o.optString("body")
+                val code = Regex("<!--\\s*vc:(\\d+)\\s*-->").find(body)?.groupValues?.get(1)?.toIntOrNull()
+                prefs.edit().putLong("last_check", now).putString("version", v).putString("url", u).putInt("code", code ?: -1).apply()
+                if (u != null && v.isNotBlank() && newerBuild(v, code)) {
+                    version = v; url = u; notes = body.replace(Regex("<!--.*?-->"), "").trim().ifBlank { null }; dismissed = false; upToDate = false
                 } else {
                     version = null; upToDate = true
                 }

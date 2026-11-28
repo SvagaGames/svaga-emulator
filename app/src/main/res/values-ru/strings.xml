@@ -50,7 +50,7 @@
     <string name="off">выкл</string>
     <string name="exit_game">В библиотеку</string>
     <string name="legal">Svaga Emulator не содержит игр. Используйте только ROM, которыми владеете. Ядра эмуляции: libretro (GPLv2/v3 и др.), оболочка: LibretroDroid (GPLv3).</string>
-    <string name="version">Svaga Games, v0.7.0</string>
+    <string name="version">Svaga Games, v%1$s</string>
     <string name="players">Игроки</string>
     <string name="community">СООБЩЕСТВО</string>
     <string name="community_total">сыграно %1$s · игроков: %2$d</string>
